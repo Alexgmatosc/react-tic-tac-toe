@@ -5,7 +5,6 @@ const TURNS = {
   O: 'o'
 }
 
-
 const Square = ({ children, isSelected, updateBoard, index }) => {
   const className= `square ${isSelected ? 'is-selected' : ''}`
   const handleClick = () => {
@@ -18,13 +17,39 @@ const Square = ({ children, isSelected, updateBoard, index }) => {
   )
 }
 
+const WINNER_COMBINATIONS = [
+  [0, 1, 2], // primera fila
+  [3, 4, 5], // segunda fila
+  [6, 7, 8], // tercera fila
+  [0, 3, 6], // primera columna
+  [1, 4, 7], // segunda columna
+  [2, 5, 8], // tercera columna
+  [0, 4, 8], // diagonal izquierda
+  [2, 4, 6] // diagonal derecha
+]
+
 function App() {
   const [board, setBoard] = useState(Array(9).fill(null))
   const [turn, setTurn] = useState(TURNS.X)
+  const [winner, setWinner] = useState(null)
+
+  const checkWinner = (boardToCheck) => {
+    // recorremos las combinaciones ganadoras
+    for (const combo of WINNER_COMBINATIONS) {
+      const [a, b, c] = combo
+      // si las tres casillas de la combinación actual son iguales
+      if (boardToCheck[a] && boardToCheck[a] === boardToCheck[b] && boardToCheck[a] === boardToCheck[c]) {
+        return boardToCheck[a] // retornamos el simbolo ganador
+      }
+    }
+    return null // si no hay ganador
+  }
+
+
   
   const updateBoard = (index) => {
     // actualizamos el tablero solo si la casilla está vacía
-    if (board[index]) return
+    if (board[index] || winner ) return
 
     // copiamos el tablero actual y actualizamos la casilla seleccionada
     const newBoard = [...board]
@@ -34,6 +59,12 @@ function App() {
     // cambiamos el turno 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    // comprobamos si hay ganador
+    const newWinner = checkWinner(newBoard)
+    if (newWinner) {  
+      setWinner(newWinner)
+    }
   }
 
   return (
